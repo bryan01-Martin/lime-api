@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.lime.limeEduApi.api.board.dao.BoardDao">
+	
+	 <insert id="createBoard">
+        /* boardMapper.createBoard [ 게시판 등록 ] */
+        INSERT INTO BOARD(
+        	NAME
+        	, TYPE
+            , REG_SEQ
+            , REG_DATE
+        ) VALUES (
+        	 #{ name }
+            , #{ type }
+            , #{ regSeq }
+            , NOW()
+        )
+    </insert>
+	
+	<select id="getBoardList" resultType="BoardDto">
+        /* boardMapper.getBoardList [ 게시판 정보 조회 ] */
+        SELECT 
+           Z.*
+        FROM (
+           SELECT
+              SEQ
+        	  , NAME
+        	  , TYPE
+           FROM
+	  	      BOARD
+	  	   WHERE 1=1
+	  	   ORDER BY SEQ DESC
+	  	   LIMIT 7
+	  	   )Z
+	    ORDER BY SEQ ASC;
+    </select>
+    
+    <select id="getBoardInfo" resultType="BoardDto">
+        /* boardMapper.getBoardInfo [ 게시판 상세 조회 ] */
+        SELECT
+        	SEQ
+            , NAME
+            , TYPE
+            , REG_SEQ
+            , REG_DATE
+            , MOD_SEQ
+            , MOD_DATE
+            , USE_YN
+        FROM
+	  	 	BOARD
+	  	WHERE 1=1
+        AND SEQ = #{boardSeq}
+    </select>
+    
+     <update id="modBoard" parameterType="BoardDto">
+        /* BoardDto.modBoard [ 게시판 수정 ] */
+        UPDATE BOARD SET
+            NAME = #{ name }
+            , TYPE = #{ type }
+            , MOD_SEQ = #{ modSeq }
+            , MOD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+    
+    <update id="deleteBoard" parameterType="BoardDto">
+        /* BoardDto.deleteBoard [ 게시판 삭제 ] */
+        DELETE FROM BOARD
+        WHERE SEQ = #{boardSeq}
+    </update>
+    
+ </mapper>

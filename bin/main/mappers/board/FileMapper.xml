@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+ <mapper namespace="com.lime.limeEduApi.api.board.dao.FileDao">
+	
+	 <insert id="insertFile" parameterType="FileDto">
+        /* FileMapper.insertFile [ 파일 등록 ] */
+        
+        INSERT INTO FILE(
+            CONTENT_SEQ
+			, ORIGINAL_FILE_NAME
+			, CONVERT_FILE_NAME
+			, FILE_SIZE
+      		, REG_SEQ
+			, MOD_SEQ
+		)VALUES(
+			#{contentSeq}
+			, #{originalFileName}
+			, #{convertFileName}
+			, #{fileSize}
+			, #{regSeq}
+			, #{modSeq}
+        )
+    </insert>
+	
+	<select id="selectFile" parameterType="int" resultType="FileDto">
+        /* FileMapper.selectFile [ 파일 정보 조회 ] */
+        SELECT
+        	SEQ
+			, CONTENT_SEQ
+			, ORIGINAL_FILE_NAME
+            , CONVERT_FILE_NAME
+            , FILE_SIZE
+            , REG_SEQ
+            , REG_DATE
+            , MOD_SEQ
+            , MOD_DATE
+            , USE_YN
+        FROM  
+	  	 	FILE F
+	  	WHERE 1=1
+        AND F.SEQ = #{ seq }
+    </select>
+    
+     <update id="deleteFile" parameterType="FileDto">
+        /* FileDto.deleteFile [ 파일 변경 ] */
+        UPDATE FILE SET
+            MOD_SEQ = #{modSeq}
+            , MOD_DATE = NOW()
+            , USE_YN = 0
+        WHERE CONTENT_SEQ = #{contentSeq}
+    </update>
+    
+ </mapper>

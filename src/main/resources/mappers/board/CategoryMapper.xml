@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lime.limeEduApi.api.board.dao.CategoryDao">
+	<sql id="categoryPrev">
+	/* categoryMapper.categoryPrev [게시판 select] */
+		SELECT
+		Z.*
+		FROM (
+		SELECT
+		ROW_NUMBER() OVER() AS RN
+	</sql>
+	<select id="selectCategoryAll" resultType="CategoryDto">
+	/* categoryMapper.selectCategoryAll [게시판 카테고리 조회] */
+		<include refid="categoryPrev"></include>
+			, SEQ
+			, NAME
+			, TYPE
+			, REG_SEQ
+			, REG_DATE
+			, USE_YN
+		FROM BOARD
+		WHERE USE_YN = 1
+		ORDER BY REG_DATE DESC
+		) Z
+	    LIMIT 0, 10
+	</select>
+	
+	<select id="selectOneCategory" parameterType="int" resultType="CategoryDto">
+	/* categoryMapper.selectOneCategory [게시판 카테고리 조회] */
+		SELECT
+			SEQ
+			, NAME
+			, TYPE
+			, REG_SEQ
+			, REG_DATE
+			, USE_YN
+		FROM BOARD
+		WHERE SEQ=#{seq}
+		ORDER BY REG_DATE DESC
+	</select>
+	
+	<insert id="insertCategory" parameterType="CategoryDto">
+		/* categoryMapper.insertCategory [게시판 카테고리 추가] */
+		<selectKey keyProperty="seq" order="AFTER" resultType="int">
+			SELECT LAST_INSERT_ID() AS SEQ
+		</selectKey>
+		INSERT INTO BOARD (
+		NAME
+		, TYPE
+		, REG_SEQ
+		, REG_DATE
+		, MOD_SEQ
+		, USE_YN
+		) VALUES (
+		#{name}
+		, #{type}
+		, #{regSeq}
+		, now()
+		, #{regSeq}
+		, 1
+		)
+	</insert>
+
+	<update id="updateCategory" parameterType="CategoryDto">
+		/* categoryMapper.updateCategory [게시판 카테고리 수정] */
+		UPDATE BOARD SET
+		NAME = #{name}
+		, TYPE = #{type}
+		WHERE SEQ=#{seq}
+	</update>
+	
+	
+</mapper>

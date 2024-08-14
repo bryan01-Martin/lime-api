@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lime.limeEduApi.api.account.dao.AccountDao">
+    <sql id="pagingPrev">
+        SELECT
+            Z.*
+        FROM (
+         SELECT
+             ROW_NUMBER() OVER() AS RN
+    </sql>
+    <sql id="pagingNext">
+    	) Z
+   		<if test='orderKey != null and !orderKey.equals("")'>
+  			ORDER BY
+        	<if test='orderKey.equals("profitComkr")'>PROFIT_COMKR</if>
+	        <if test='orderKey.equals("bigComkr")'>BIG_COMKR</if>
+	        <if test='orderKey.equals("middleComkr")'>MIDDLE_COMKR</if>
+	        <if test='orderKey.equals("smallComkr")'>SMALL_COMKR</if>
+	        <if test='orderKey.equals("detailComkr")'>DETAIL_COMKR</if>
+	        <if test='orderKey.equals("totalMoney")'>TOTAL_MONEY</if>
+	        <if test='orderKey == null or orderKey.equals("regDate")'>REG_DATE</if>
+	        <if test='orderKey.equals("regNm")'>REG_NM</if>
+	        <if test='orderKey.equals("detailCnt")'>DETAIL_CNT</if>
+	        <if test='orderBy.equals("ASC")'> ASC</if>
+	        <if test='orderBy == null or orderBy.equals("DESC")'> DESC</if>
+        </if>
+        <if test="isExcel == false">
+            LIMIT #{start}, #{cnt}
+        </if>
+    </sql>
+    <sql id="searchUser">
+    	<if test='profitCost != null and !profitCost.equals("")'>
+            AND PROFIT_COST LIKE CONCAT('%', #{profitCost},'%')
+        </if>
+        <if test='bigGroup != null and !bigGroup.equals("")'>
+            AND BIG_GROUP LIKE CONCAT('%', #{bigGroup},'%')
+        </if>
+    	<if test='middleGroup != null and !middleGroup.equals("")'>
+            AND MIDDLE_GROUP LIKE CONCAT('%', #{middleGroup},'%')
+        </if>
+        <if test='smallGroup != null and !smallGroup.equals("")'>
+            AND SMALL_GROUP LIKE CONCAT('%', #{smallGroup},'%')
+        </if>
+    	<if test='detailGroup != null and !detailGroup.equals("")'>
+            AND DETAIL_GROUP LIKE CONCAT('%', #{detailGroup},'%')
+        </if>
+    	<if test='min != null and !min.equals("")'>
+            AND STB.SUM_COST >= #{min}
+        </if>
+    	<if test='max != null and !max.equals("")'>
+            <![CDATA[
+            	AND STB.SUM_COST <= #{max}
+           ]]> 
+        </if>
+    	<if test='sumMin != null and !sumMin.equals("")'>
+            AND STB.TRANSACTION_MONEY >= #{sumMin}
+        </if>
+    	<if test='sumMax != null and !sumMax.equals("")'>
+            <![CDATA[
+            	AND STB.TRANSACTION_MONEY <= #{sumMax}
+           ]]> 
+        </if>
+    </sql>
+
+    <select id="getAccountList" resultType="AccountDto" parameterType="AccountListReq">
+        /* AccountMapper.getAccountList [ 회계 목록 조회 ] */
+        <include refid="pagingPrev"></include>
+            , A.SEQ
+			 , A.PROFIT_COST
+             ,(select COM_KOR from CODE C WHERE C.CODE = A.PROFIT_COST) as PROFIT_COMKR
+             , A.BIG_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.BIG_GROUP) as BIG_COMKR
+			 , A.MIDDLE_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.MIDDLE_GROUP) as MIDDLE_COMKR
+			 , A.SMALL_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.SMALL_GROUP) as SMALL_COMKR
+			 , A.DETAIL_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.DETAIL_GROUP) as DETAIL_COMKR
+			 ,(select sum(D.TRANSACTION_MONEY) from account_detail_tb D where D.account_seq = A.SEQ) as TOTAL_MONEY
+			 , U.NAME as REG_NM
+			 , A.REG_DATE
+			 , A.USE_YN
+			 ,STB.TOTAL_CNT as DETAIL_CNT
+        FROM ACCOUNT A
+        LEFT JOIN ( 
+                    SELECT 
+                         ACCOUNT_SEQ 
+                         , USE_YN 
+                         , TRANSACTION_MONEY 
+                         , COUNT(case when USE_YN = 1 THEN 1 END) AS TOTAL_CNT  
+                         , SUM(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS SUM_COST
+                         , MIN(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS MIN_COST 
+                         , MAX(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS MAX_COST 
+                      FROM ACCOUNT_DETAIL_TB 
+                      WHERE USE_YN = 1
+                      GROUP BY ACCOUNT_SEQ 
+                      ) STB 
+             on A.SEQ = STB.ACCOUNT_SEQ 
+        LEFT JOIN CODE C
+			ON C.CODE = A.PROFIT_COST
+		LEFT JOIN USER U
+			ON A.REG_SEQ = U.SEQ
+        WHERE 1 = 1
+        <include refid="searchUser"></include>
+<!--         GROUP BY D.ACCOUNT_SEQ  -->
+        <include refid="pagingNext"></include>
+    </select>
+    
+    <select id="getAccountListCnt" resultType="int" parameterType="AccountDto">
+        /* AccountMapper.getAccountListCnt [ 회계 목록 수 조회 ] */
+<!--         SELECT COUNT(*) -->
+<!--         FROM ACCOUNT A -->
+<!-- 	    JOIN ACCOUNT_DETAIL_TB D -->
+<!-- 			ON A.SEQ = D.ACCOUNT_SEQ	 -->
+<!--         WHERE 1 = 1 -->
+        SELECT COUNT(*)
+		FROM (
+		    SELECT DISTINCT A.SEQ
+		    FROM ACCOUNT A
+		    left join ( 
+                    SELECT 
+                         ACCOUNT_SEQ 
+                         , USE_YN 
+                         , TRANSACTION_MONEY 
+                         , COUNT(case when USE_YN = 1 THEN 1 END) AS TOTAL_CNT  
+                         , SUM(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS SUM_COST
+                         , MIN(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS MIN_COST 
+                         , MAX(case when USE_YN = 1 THEN TRANSACTION_MONEY END) AS MAX_COST 
+                      FROM ACCOUNT_DETAIL_TB 
+                      GROUP BY ACCOUNT_SEQ 
+                      ) STB 
+             on A.SEQ = STB.ACCOUNT_SEQ 
+		    JOIN CODE C 
+			 	ON C.CODE = A.PROFIT_COST 
+			JOIN USER U 
+			 	ON A.REG_SEQ = U.SEQ 
+			JOIN ACCOUNT_DETAIL_TB D
+			 	ON A.SEQ = D.ACCOUNT_SEQ 
+		    WHERE 1 = 1
+		    <include refid="searchUser"></include>
+		) AS subquery;
+    </select>
+    
+   <select id="getAccountInfo" resultType="AccountDto" parameterType="AccountInfoReq">
+        /* AccountMapper.getAccountInfo [ 회계 정보 조회 ] */
+        SELECT
+            A.SEQ
+             , A.PROFIT_COST
+             ,(select COM_KOR from CODE C WHERE C.CODE = A.PROFIT_COST) as PROFIT_COMKR
+             , A.BIG_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.BIG_GROUP) as BIG_COMKR
+			 , A.MIDDLE_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.MIDDLE_GROUP) as MIDDLE_COMKR
+			 , A.SMALL_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.SMALL_GROUP) as SMALL_COMKR
+			 , A.DETAIL_GROUP
+			 ,(select COM_KOR from CODE C WHERE C.CODE = A.DETAIL_GROUP) as DETAIL_COMKR
+            , A.USE_YN
+        FROM ACCOUNT A	
+        WHERE 1 = 1
+        AND A.SEQ = #{ seq }
+    </select>
+
+    <insert id="regAccount">
+        /* AccountMapper.regAccount [ 회계 등록 ] */
+        <selectKey resultType="int" keyProperty="seq" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO ACCOUNT(
+            PROFIT_COST
+            , BIG_GROUP
+            , MIDDLE_GROUP
+            , SMALL_GROUP
+            , DETAIL_GROUP
+            , REG_SEQ
+            , REG_DATE
+            , MOD_SEQ
+            , MOD_DATE
+        ) VALUES (
+            #{ profitCost } 
+            , #{ bigGroup }
+            , #{ middleGroup }
+            , #{ smallGroup }
+            , #{ detailGroup }
+            , #{ regSeq }
+            , NOW()
+            , #{ modSeq }
+            , NOW()
+        )
+    </insert>
+
+    <update id="modAccount" parameterType="AccountDto">
+        /* AccountMapper.modAccount [ 회계 수정 ] */
+        UPDATE ACCOUNT SET
+        	PROFIT_COST = #{ profitCost }
+            , BIG_GROUP = #{ bigGroup }
+            , MIDDLE_GROUP = #{ middleGroup }
+            , SMALL_GROUP = #{ smallGroup }
+            , DETAIL_GROUP = #{ detailGroup }
+            , MOD_SEQ = #{modSeq}
+            , MOD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+</mapper>

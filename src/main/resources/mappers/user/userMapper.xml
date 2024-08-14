@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lime.limeEduApi.api.user.dao.UserDao">
+    <sql id="pagingPrev">
+        SELECT
+            Z.*
+        FROM (
+                 SELECT
+                     ROW_NUMBER() OVER() AS RN
+    </sql>
+    <sql id="pagingNext">
+        <if test='orderKey != null and !orderKey.equals("")'>
+            ORDER BY
+            <if test='orderKey.equals("seq")'> SEQ</if>
+            <if test='orderKey.equals("userId")'> USER_ID</if>
+            <if test='orderKey.equals("name")'> NAME</if>
+            <if test='orderKey.equals("type")'> TYPE</if>
+            <if test='orderKey.equals("useYn")'> USE_YN</if>
+            <if test='orderKey.equals("regDate")'> REG_DATE</if>
+            <if test='orderBy.equals("ASC")'> ASC</if>
+            <if test='orderBy == null or orderBy.equals("DESC")'> DESC</if>
+        </if>
+        ) Z
+        LIMIT #{start}, #{cnt}
+    </sql>
+    <sql id="searchUser">
+        <if test='userId != null and !userId.equals("")'>
+            AND USER_ID LIKE CONCAT('%', #{userId},'%')
+        </if>
+        <if test='name != null and !name.equals("")'>
+            AND NAME LIKE CONCAT('%', #{name},'%')
+        </if>
+    </sql>
+
+    <select id="getUserInfo" resultType="UserDto" parameterType="UserInfoReq">
+        /* UserMapper.getUserInfo [ 회원 정보 조회 ] */
+        SELECT
+            SEQ
+             , USER_ID
+             , NAME
+             , TYPE
+             , REG_SEQ
+             , REG_DATE
+             , MOD_SEQ
+             , MOD_DATE
+             , USE_YN
+        FROM USER
+        WHERE 1 = 1
+          AND SEQ = #{ seq }
+    </select>
+
+    <select id="getUserInfoList" resultType="UserDto" parameterType="UserInfoListReq">
+        /* UserMapper.getUserInfoList [ 회원 목록 조회 ] */
+        <include refid="pagingPrev"></include>
+        , SEQ
+        , USER_ID
+        , NAME
+        , TYPE
+        , REG_SEQ
+        , REG_DATE
+        , MOD_SEQ
+        , MOD_DATE
+        , USE_YN
+        FROM USER
+        WHERE 1 = 1
+        <include refid="searchUser"></include>
+        <include refid="pagingNext"></include>
+    </select>
+    <select id="getUserInfoListCnt" resultType="int" parameterType="UserInfoListReq">
+        /* UserMapper.getUserInfoListCnt [ 회원 목록 수 조회 ] */
+        SELECT COUNT(*)
+        FROM USER
+        WHERE 1 = 1
+        <include refid="searchUser"></include>
+    </select>
+
+    <insert id="regUser" parameterType="UserAddReq">
+        /* UserMapper.regUser [ 회원 등록 ] */
+        <selectKey resultType="int" keyProperty="seq" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO USER(
+        USER_ID
+        , PASSWORD
+        , NAME
+        , TYPE
+        , REG_SEQ
+        , MOD_SEQ
+        ) VALUES (
+        #{ userId }
+        , 'a12345678'
+        , #{ name }
+        , #{ type }
+        , #{ regSeq }
+        , #{ regSeq }
+        )
+    </insert>
+
+    <update id="modUser" parameterType="UserModReq">
+        /* UserMapper.modUser [ 회원 수정 ] */
+        UPDATE USER SET
+            NAME = #{ name }
+            , TYPE = #{ type }
+            , USE_YN = #{ useYn }
+            , MOD_SEQ = #{ modSeq }
+            , MOD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+
+    <update id="changePassword" parameterType="UserDto">
+        /* UserMapper.changePassword [ 회원 비밀번호 수정 ] */
+        UPDATE USER SET
+            PASSWORD = #{ password }
+            , MOD_SEQ = #{ modSeq }
+            , MOD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+
+    <select id="checkUserId" parameterType="checkUserIdReq" resultType="int">
+        /* UserMapper.changePassword [ 회원 아이디 중복체크 ] */
+        SELECT
+            COUNT(USER_ID)
+        FROM USER
+        WHERE 1=1
+        AND USER_ID = #{ userId }
+    </select>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lime.limeEduApi.api.account.dao.AccountDetailDao">
+   <select id="getAccountDetailInfo" resultType="AccountDto" parameterType="AccountInfoReq">
+        /* AccountMapper.getAccountDetailInfo [ 회계 상세 조회 ] */
+        SELECT
+        	SEQ
+        	, ACCOUNT_SEQ
+        	, COMMENTS
+        	, TRANSACTION_MONEY
+        	, TRANSACTION_DATE
+            , REG_SEQ
+            , REG_DATE
+        FROM ACCOUNT_DETAIL_TB D
+        WHERE 1 = 1
+        AND ACCOUNT_SEQ = #{ seq }
+        AND USE_YN = 1
+    </select>
+    
+    
+
+    <insert id="regAccountDetail">
+        /* AccountDetailMapper.regAccountDetail [ 회계 상세 등록 ] */
+        INSERT INTO ACCOUNT_DETAIL_TB(
+            SEQ
+            , ACCOUNT_SEQ
+            , COMMENTS
+            , TRANSACTION_MONEY
+            , TRANSACTION_DATE
+            , REG_SEQ
+            , MOD_SEQ
+        ) VALUES (
+            #{ seq }
+            , #{ accountSeq }
+            , #{ comments }
+            , #{ transactionMoney }
+            , #{ transactionDate }
+            , #{ regSeq }
+            , #{ regSeq }
+        )
+    </insert>
+
+    <update id="modAccountDetail" parameterType="AccountDto">
+        /* AccountMapper.modAccountDetail [ 회계 상세 수정 ] */
+       UPDATE ACCOUNT_DETAIL_TB SET
+        	COMMENTS = #{ comments }
+            , TRANSACTION_MONEY = #{ transactionMoney }
+            , TRANSACTION_DATE = #{ transactionDate }
+            , MOD_SEQ = #{ modSeq }
+            , MOD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+    
+    <update id="delAccountDetail" parameterType="AccountDto">
+        UPDATE ACCOUNT_DETAIL_TB SET
+           USE_YN = 0
+           , MOD_SEQ = #{modSeq}
+           , MOD_DATE = NOW()
+        WHERE SEQ = #{ seq }
+    </update>
+</mapper>

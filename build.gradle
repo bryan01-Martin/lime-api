@@ -1,0 +1,108 @@
+ plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.8'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.lime.limeEduApi'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+}
+
+bootJar{
+    archiveFileName = 'limeEduApi.jar'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+
+
+    implementation 'org.javassist:javassist:3.27.0-GA'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    implementation 'org.apache.poi:poi:3.15'
+    implementation 'org.apache.poi:poi-ooxml:3.15'
+
+    implementation 'commons-net:commons-net:3.6'
+    implementation 'commons-io:commons-io:2.6'
+
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+    implementation 'log4j:log4j:1.2.17'
+    implementation group: 'net.sf.jxls', name: 'jxls-core', version: '1.0.5'
+
+    runtimeOnly 'mysql:mysql-connector-java:8.0.29'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+
+
+    // security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+
+    runtimeOnly group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.19'
+    // https://mvnrepository.com/artifact/com.squareup.okhttp/okhttp
+    implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // 메일
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.apache.httpcomponents:httpmime:4.3.6'
+    // 문자발송 https://mvnrepository.com/artifact/org.apache.http/fluent-hc
+
+    // SFTP 파일 송수신
+    implementation 'com.jcraft:jsch:0.1.55'
+    // 동영상 파일 썸네일 생성
+    implementation 'org.jcodec:jcodec:0.2.5'
+    implementation 'org.jcodec:jcodec-javase:0.2.5'
+
+    // MIME TYPE 확인
+    // https://mvnrepository.com/artifact/org.apache.tika/tika-core
+    implementation 'org.apache.tika:tika-core:2.8.0'
+    // https://mvnrepository.com/artifact/org.apache.tika/tika-parsers
+    implementation 'org.apache.tika:tika-parsers:2.8.0'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Gradle Task 추가
+task generateMyBatis(type: JavaExec) {
+    main = 'org.mybatis.generator.api.ShellRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['-configfile', 'src/main/resources/generatorConfig.xml', '-overwrite']
+}

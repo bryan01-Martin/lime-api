@@ -1,0 +1,32 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+    <!-- namespace 에는 해당 DAO의 경로를 작성합니다.-->
+
+<mapper namespace="com.lime.limeEduApi.framework.security.dao.LoginDao">
+
+	<sql id="user">
+		SELECT
+			SEQ
+			, USER_ID
+			, PASSWORD
+            , NAME
+            , TYPE
+            , REG_SEQ
+            , REG_DATE
+            , MOD_SEQ
+            , MOD_DATE
+            , USE_YN
+		FROM USER U
+		WHERE 1=1
+	</sql>
+
+	<select id="selectUser" parameterType="UserDto" resultType="UserDto">
+		/* loginMapper.selectUser [ 회원정보 조회 ]*/
+		<include refid="user"></include>
+		AND U.USE_YN = '1'
+		AND U.USER_ID = #{userId}
+	</select>
+
+</mapper>

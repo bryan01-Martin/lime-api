@@ -1,0 +1,57 @@
+spring:
+  database:
+    continue-on-error: true
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    username: lateriteDev
+    password: limedev123!@#
+    url: jdbc:log4jdbc:mariadb://127.0.0.1:13307/laterite
+  freemarker:
+    cache: false
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+  redis:
+    host: 127.0.0.1
+    port: 25200
+    password: limedevredis
+  mail:
+    host: smtp.gmail.com #
+    port: 587 #
+    username: 'bsbglobaldev'
+    password: 'emmjckjbutkslalt' #
+    properties:
+      mail:
+        smtp:
+          auth: true #
+          timeout: 5000 #
+          starttls:
+            enable: true #
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      location: /D:/temp
+
+logging:
+  config: classpath:log4j2.xml
+  level:
+    com: info
+    jdbc:
+      resultsettable: info
+
+server.port: 16001
+
+ftp:
+  host: 127.0.0.1
+  port: 35322
+  id: limeEdu
+  password: limeEdu1!
+  rootDir: /D:/FTP
+  serverType: ubuntu

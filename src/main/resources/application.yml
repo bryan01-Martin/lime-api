@@ -1,0 +1,45 @@
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  profiles:
+    active: local
+    # active: dev
+    # active: product
+  messages:
+    basename: i18n/messages/message
+    encoding: UTF-8
+    use-code-as-default-message: true
+    cache-duration: 60 # 3600 #시간단위로 다시읽어오기
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+    path: /api/filterError
+
+logging:
+  level:
+    jdbc:
+      sqlonly: off
+      sqltiming: info
+      audit: off
+      resultset: off
+      connection: off
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    multiple-result-sets-enabled: false
+  #    jdbc-type-for-null: varchar
+  mapper-locations: classpath:mappers/**/*.xml
+  type-aliases-package: com.lime.limeEduApi.api.*.dto
+                      , com.lime.limeEduApi.api.*.domain
+                      , com.lime.limeEduApi.framework.*.domain
+
+jwt:
+  header: Authorization
+  secret: bGltZVNlY3JldEtleSFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAISFAIyNAIQ #limeSecretKey!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!!@##@!
+  access-token-validity-in-seconds: 60 # 10 min
+  refresh-token-validity-in-seconds: 2592000 # 30 days
